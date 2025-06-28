@@ -4,12 +4,16 @@ services:
     build: ./frontend
     ports:
       - "5173:5173"
+    volumes:
+      - ./frontend:/usr/src/app
     env_file:
       - .env
   backend:
     build: ./backend
     network_mode: "host"
+    command: gunicorn --bind 0.0.0.0:5000 --workers 1 --timeout 600 app:app
     volumes:
       - ./images:/images
+      - ./backend:/app
     env_file:
       - .env
