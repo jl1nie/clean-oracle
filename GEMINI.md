@@ -132,9 +132,11 @@ sudo chown 100:100 /home/minoru/src/clean-oracle/images
 ```
 
 **フロントエンドのAPI呼び出し:**
-フロントエンド（Reactアプリケーション）は、Viteのプロキシを使用せず、バックエンドのAPIを直接絶対URL（例: `http://localhost:5000/api/register`）で呼び出します。
+フロントエンド（Reactアプリケーション）は、Viteのプロキシ設定を利用してバックエンドAPIを呼び出します。コンポーネント内の`fetch`リクエストでは、`/api/register`のような相対パスを使用してください。これにより、開発サーバーがリクエストを適切にバックエンド（またはE2Eテスト時のモックサーバー）に転送します。
 
 ## テストコマンド
+
+### バックエンド
 
 バックエンドのテストは`pytest`を使用して実行します。`backend`ディレクトリに移動し、以下のコマンドを実行してください。
 
@@ -146,11 +148,39 @@ uv pip install -r requirements.txt
 .venv/bin/pytest
 ```
 
+### フロントエンド
+
+フロントエンドのユニットテストは`vitest`、E2Eテストは`playwright`を使用して実行します。どちらのテストも、`frontend/mock-server.js`をモックサーバーとして利用します。
+
+`frontend`ディレクトリに移動し、以下のコマンドを実行してください。
+
+```bash
+cd frontend
+npm install
+```
+
+**ユニットテスト:**
+```bash
+npm test
+```
+
+**E2Eテスト:**
+```bash
+npm run test:e2e
+```
+
+**E2Eテストの注意点:**
+- E2Eテストは、`playwright.config.js`の`webServer`設定に基づき、テスト実行前に自動的にVite開発サーバーとモックサーバー(`mock-server.js`)を起動します。
+- `vite.config.js`のプロキシ設定により、アプリケーションからの`/api/*`へのリクエストは、`http://localhost:3001`で実行されているモックサーバーに転送されます。
+- 初回実行時やブラウザのバージョンアップ後など、Playwrightが必要とするブラウザの依存関係が不足している場合があります。その場合は、以下のコマンドを実行して依存関係をインストールしてください（`sudo`権限が必要です）。
+  ```bash
+  sudo npx playwright install-deps
+  ```
+
 ## リンター & フォーマッター
 
 コードのフォーマットと静的解析には `ruff` を使用します。
-
-```bash
+bash
 # フォーマット
 ruff format .
 

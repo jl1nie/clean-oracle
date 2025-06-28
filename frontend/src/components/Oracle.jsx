@@ -49,7 +49,7 @@ const Oracle = ({ referenceUUID, onReferenceNotFound }) => {
     formData.append('config', JSON.stringify({ type: genderConfig })); // Send config as JSON string
 
     try {
-      const response = await fetch('http://localhost:5000/api/oracle', {
+      const response = await fetch('/api/oracle', {
         method: 'POST',
         body: formData,
       });

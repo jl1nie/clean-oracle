@@ -29,7 +29,7 @@ const Register = ({ onUploadSuccess }) => {
     formData.append('image', selectedFile);
 
     try {
-      const response = await fetch('http://localhost:5000/api/register', {
+      const response = await fetch('/api/register', {
         method: 'POST',
         body: formData,
       });

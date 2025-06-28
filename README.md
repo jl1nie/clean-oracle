@@ -67,34 +67,3 @@ sudo chown $(whoami):$(whoami) ./images
 
 ### 設定変更
 すべてのページには設定ボタンがあり、設定ダイアログでは「神を選ぶ」で「Male」または「Female」を選択し、設定情報をバックエンドに送ることができます。
-
-## テストの実行方法
-
-バックエンドのテストは`pytest`を使用して実行します。`backend`ディレクトリに移動し、以下のコマンドを実行してください。
-
-```bash
-cd backend
-uv venv
-. .venv/bin/activate
-uv pip install -r requirements.txt
-.venv/bin/pytest
-```
-
-## リンター & フォーマッター
-
-コードのフォーマットと静的解析には `ruff` を使用します。
-
-```bash
-# フォーマット
-ruff format .
-
-# lintチェックと自動修正
-ruff check . --fix
-```
-
-## 型チェック
-
-型チェックには `mypy` を使用します。
-
-```bash
-mypy .
