@@ -29,7 +29,8 @@ const Register = ({ onUploadSuccess }) => {
     formData.append('image', selectedFile);
 
     try {
-      const response = await fetch('/api/register', {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+      const response = await fetch(`${baseUrl}/api/register`, {
         method: 'POST',
         body: formData,
       });

@@ -49,7 +49,8 @@ const Oracle = ({ referenceUUID, onReferenceNotFound }) => {
     formData.append('config', JSON.stringify({ type: genderConfig })); // Send config as JSON string
 
     try {
-      const response = await fetch('/api/oracle', {
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+      const response = await fetch(`${baseUrl}/api/oracle`, {
         method: 'POST',
         body: formData,
       });
@@ -89,43 +90,16 @@ const Oracle = ({ referenceUUID, onReferenceNotFound }) => {
 
   return (
     <div style={{ textAlign: 'center', marginTop: '50px' }}>
-      <h2>神託を授けます</h2>
-      {/* Settings Button */}
-      <div style={{ position: 'absolute', top: '20px', right: '20px' }}>
-        <label>
-          神を選ぶ:
-          <select value={genderConfig} onChange={handleSettingsChange}>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-          </select>
-        </label>
-      </div>
-
-      {oracleResult ? (
-        // Display Oracle Result
-        <div>
-          <p dangerouslySetInnerHTML={{ __html: oracleResult.message }}></p>
-          {preview && (
-            <div style={{ marginTop: '20px' }}>
-              <img src={preview} alt="民の部屋の画像" style={{ maxWidth: '100%', maxHeight: '300px' }} />
-            </div>
-          )}
-          <button onClick={handleTryAgain} style={{ marginTop: '20px' }}>
-            再度トライ
-          </button>
-        </div>
-      ) : (
-        // Upload Form
-        <div>
-          <p>民の部屋の画像をアップロードしてください。</p>
-          <input
-            type="file"
-            accept="image/jpeg,image/png"
-            onChange={handleFileChange}
-            style={{ display: 'none' }}
-            id="current-image-upload"
-          />
-          <label htmlFor="current-image-upload" style={{ cursor: 'pointer', padding: '10px 20px', border: '1px solid #ccc', borderRadius: '5px' }}>
+      <h2>部屋のきれいさを判定します</h2>
+      <p>現在の部屋の画像をアップロードしてください。</p>
+      <input 
+        type="file" 
+        accept="image/jpeg,image/png" 
+        onChange={handleFileChange} 
+        style={{ display: 'none' }} 
+        id="oracle-file-upload"
+      />
+          <label htmlFor="oracle-file-upload" style={{ cursor: 'pointer', padding: '10px 20px', border: '1px solid #ccc', borderRadius: '5px' }}>
             画像を選択
           </label>
 
@@ -145,9 +119,18 @@ const Oracle = ({ referenceUUID, onReferenceNotFound }) => {
 
           {loading && <div style={{ marginTop: '10px' }}>分析中、しばらくお待ちください...</div>}
           {error && <div style={{ color: 'red', marginTop: '10px' }}>{error}</div>}
+          {oracleResult && (
+            <div style={{ marginTop: '20px', padding: '20px', border: '1px solid #ddd', borderRadius: '5px' }}>
+              <h3>神託</h3>
+              <div data-testid="oracle-message" dangerouslySetInnerHTML={{ __html: oracleResult.message }} />
+            </div>
+          )}
+          {oracleResult && (
+            <button onClick={handleTryAgain} style={{ marginTop: '20px' }}>
+              再度トライ
+            </button>
+          )}
         </div>
-      )}
-    </div>
   );
 };
 

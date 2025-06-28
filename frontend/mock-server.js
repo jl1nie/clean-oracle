@@ -1,9 +1,12 @@
 import express from 'express';
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
+import cors from 'cors';
 
 const app = express();
 const port = 3001;
+
+app.use(cors());
 
 const upload = multer({ dest: 'uploads/' });
 

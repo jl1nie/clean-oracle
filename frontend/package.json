@@ -15,6 +15,7 @@
     "test:serve": "concurrently \"node mock-server.js\" \"vite --port 5174\""
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

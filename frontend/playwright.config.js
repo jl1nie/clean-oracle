@@ -43,6 +43,6 @@ export default defineConfig({
   webServer: {
     command: 'npm run test:serve',
     url: 'http://localhost:5174',
-    reuseExistingServer: false,
+    reuseExistingServer: true,
   },
 });
