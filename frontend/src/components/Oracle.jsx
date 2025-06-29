@@ -5,15 +5,22 @@ const Oracle = ({ referenceUUID, onReferenceNotFound }) => {
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [oracleResult, setOracleResult] = useState(null); // { message: string }
-  const [genderConfig, setGenderConfig] = useState('Male'); // Default to Male, load from localStorage
+  const [oracleResult, setOracleResult] = useState(null);
+  const [genderConfig, setGenderConfig] = useState('Male');
+  const [referenceImageUrl, setReferenceImageUrl] = useState('');
 
   useEffect(() => {
     const storedGender = localStorage.getItem('oracleGender');
     if (storedGender) {
       setGenderConfig(storedGender);
     }
-  }, []);
+
+    if (referenceUUID) {
+      // Fetch the reference image URL when the component mounts
+      const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
+      setReferenceImageUrl(`${baseUrl}/api/image/${referenceUUID}`);
+    }
+  }, [referenceUUID]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -24,8 +31,8 @@ const Oracle = ({ referenceUUID, onReferenceNotFound }) => {
         setPreview(reader.result);
       };
       reader.readAsDataURL(file);
-      setError(''); // Clear previous errors
-      setOracleResult(null); // Clear previous results
+      setError('');
+      setOracleResult(null);
     }
   };
 
@@ -46,7 +53,7 @@ const Oracle = ({ referenceUUID, onReferenceNotFound }) => {
     const formData = new FormData();
     formData.append('image', selectedFile);
     formData.append('reference_uuid', referenceUUID);
-    formData.append('config', JSON.stringify({ type: genderConfig })); // Send config as JSON string
+    formData.append('config', JSON.stringify({ type: genderConfig }));
 
     try {
       const baseUrl = import.meta.env.VITE_API_BASE_URL || '';
@@ -57,7 +64,7 @@ const Oracle = ({ referenceUUID, onReferenceNotFound }) => {
 
       if (!response.ok) {
         if (response.status === 404) {
-          onReferenceNotFound(); // Notify App.jsx to clear UUID and show Register
+          onReferenceNotFound();
           setError('Reference image not found. Please register a new one.');
           return;
         }
@@ -81,7 +88,6 @@ const Oracle = ({ referenceUUID, onReferenceNotFound }) => {
     setError('');
   };
 
-  // Placeholder for settings dialog
   const handleSettingsChange = (e) => {
     const newGender = e.target.value;
     setGenderConfig(newGender);
@@ -92,45 +98,56 @@ const Oracle = ({ referenceUUID, onReferenceNotFound }) => {
     <div style={{ textAlign: 'center', marginTop: '50px' }}>
       <h2>部屋のきれいさを判定します</h2>
       <p>現在の部屋の画像をアップロードしてください。</p>
-      <input 
-        type="file" 
-        accept="image/jpeg,image/png" 
-        onChange={handleFileChange} 
-        style={{ display: 'none' }} 
-        id="oracle-file-upload"
-      />
-          <label htmlFor="oracle-file-upload" style={{ cursor: 'pointer', padding: '10px 20px', border: '1px solid #ccc', borderRadius: '5px' }}>
-            画像を選択
-          </label>
 
-          {preview && (
-            <div style={{ marginTop: '20px' }}>
-              <img src={preview} alt="民の部屋のプレビュー" style={{ maxWidth: '100%', maxHeight: '300px'}} />
-            </div>
-          )}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '20px' }}>
+        {referenceImageUrl && (
+          <div style={{ border: '1px solid #ccc', padding: '10px', borderRadius: '5px' }}>
+            <h3>神の部屋</h3>
+            <img src={referenceImageUrl} alt="神の部屋" style={{ maxWidth: '300px', maxHeight: '300px' }} />
+          </div>
+        )}
+        {preview && (
+          <div style={{ border: '1px solid #ccc', padding: '10px', borderRadius: '5px' }}>
+            <h3>民の部屋</h3>
+            <img src={preview} alt="民の部屋のプレビュー" style={{ maxWidth: '300px', maxHeight: '300px' }} />
+          </div>
+        )}
+      </div>
 
-          {selectedFile && (
-            <div style={{ marginTop: '20px' }}>
-              <button onClick={handleUpload} disabled={loading}>
-                {loading ? 'アップロード中...' : 'アップロード'}
-              </button>
-            </div>
-          )}
+      <div style={{ marginTop: '20px' }}>
+        <input
+          type="file"
+          accept="image/jpeg,image/png"
+          onChange={handleFileChange}
+          style={{ display: 'none' }}
+          id="oracle-file-upload"
+        />
+        <label htmlFor="oracle-file-upload" style={{ cursor: 'pointer', padding: '10px 20px', border: '1px solid #ccc', borderRadius: '5px' }}>
+          画像を選択
+        </label>
+      </div>
 
-          {loading && <div style={{ marginTop: '10px' }}>分析中、しばらくお待ちください...</div>}
-          {error && <div style={{ color: 'red', marginTop: '10px' }}>{error}</div>}
-          {oracleResult && (
-            <div style={{ marginTop: '20px', padding: '20px', border: '1px solid #ddd', borderRadius: '5px' }}>
-              <h3>神託</h3>
-              <div data-testid="oracle-message" dangerouslySetInnerHTML={{ __html: oracleResult.message }} />
-            </div>
-          )}
-          {oracleResult && (
-            <button onClick={handleTryAgain} style={{ marginTop: '20px' }}>
-              再度トライ
-            </button>
-          )}
+      {selectedFile && !oracleResult && (
+        <div style={{ marginTop: '20px' }}>
+          <button onClick={handleUpload} disabled={loading}>
+            {loading ? 'アップロード中...' : 'アップロード'}
+          </button>
         </div>
+      )}
+
+      {loading && <div style={{ marginTop: '10px' }}>分析中、しばらくお待ちください...</div>}
+      {error && <div style={{ color: 'red', marginTop: '10px' }}>{error}</div>}
+      
+      {oracleResult && (
+        <div style={{ marginTop: '20px', padding: '20px', border: '1px solid #ddd', borderRadius: '5px' }}>
+          <h3>神託</h3>
+          <div data-testid="oracle-message" dangerouslySetInnerHTML={{ __html: oracleResult.message }} />
+          <button onClick={handleTryAgain} style={{ marginTop: '20px' }}>
+            再度トライ
+          </button>
+        </div>
+      )}
+    </div>
   );
 };
 

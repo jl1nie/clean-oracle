@@ -31,10 +31,14 @@ git clone https://github.com/your-repo/clean-oracle.git
 cd clean-oracle
 ```
 
-### 2. `.env`ファイルの作成と設定
-プロジェクトルートに`.env`ファイルを作成し、LMStudioのAPIエンドポイントを設定します。LMStudioがホストマシンで実行されている場合、通常は以下のようになります。
+### 2. `.env`フ��イルの作成と設定
+プロジェクトルートに`.env`ファイルを作成し、バックエンドAPIのURLとLMStudioのAPIエンドポイントを設定します。
 
-```
+```.env
+# バックエンドAPIのベースURL
+VITE_API_BASE_URL=http://localhost:5000
+
+# ローカルLLMのAPIエンドポイント
 LLM_API_URL=http://localhost:1234/v1/chat/completions
 ```
 
@@ -44,11 +48,15 @@ docker compose up --build
 ```
 
 ### 4. ファイル権限の設定
-バックエンドが画像を保存する`./images`ディレクトリは、ホストマシンの`./images`ディレクトリにマウントされます。コンテナ内のアプリケーションユーザーがこのディレクトリに書き込めるよう、ホストマシン上で適切な権限を設定する必要があります。例えば、現在のユーザーに所有権を与えるには、以下のコマンドを実行します。
+バックエンドが画像を保存する`./images`ディレクトリは、ホストマシンの`./images`ディレクトリにマウントされます。コンテナ内のアプリケーションユーザーがこのディレクトリに書き込めるよう、ホストマシン上で適切な権限を設定する必要があります。
+
+**初回起動時**に、以下のコマンドを実行して`images`ディレクトリを作成し、適切な権限を与えてください。
 
 ```bash
-sudo chown $(whoami):$(whoami) ./images
+mkdir -p images
+sudo chown 101:101 images
 ```
+(コンテナ内の`appuser`のGIDが`101`であると仮定しています。環境によって調整が必要な場合があります。)
 
 ## 使い方
 

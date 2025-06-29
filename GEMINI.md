@@ -44,6 +44,7 @@
 |:--|:--:|:--|:--|:--|
 |/api/register|POST| 「神の部屋」の登録| image: 「神の部屋」(jpg) | uuid: 「神の部屋」の画像ファイ��を表すUUID|
 |/api/oracle| POST | 「民の部屋」への神託| reference_uuid  : 「神の部屋」のUUID<br> image : 「民の部屋」(jpg)<br> config : 設定情報　type : "Male", "Female"|　　　　　　message : 神託(HTML text)<br>|
+|/api/image/<uuid>| GET | 画像ファイルの取得 | uuid: 画像ファイルのUUID | image: 画像ファイル |
 
 ### Vision LLMによる画像分析プロンプト
 - 与えられた「参照画像」と「現状画像」を比較し、以下の項目について分析結果をJSON形式で返す。
@@ -115,14 +116,21 @@ docker compose up --build
 ```
 
 **環境設定:**
-ローカルLLMのAPIエンドポイントは、プロジェクトルートの`.env`ファイルで`LLM_API_URL`として設定します。LMStudioがホストマシンで実行されている場合、通常は以下のように設定します。
+フロントエンドとバックエンド間の通信を正しく設定するために、プロジェクトルートの`.env`ファイルに以下の変数を設定します。
 
 ```
+# バックエンドAPIのベースURL
+VITE_API_BASE_URL=http://localhost:5000 
+
+# ローカルLLMのAPIエンドポイント
 LLM_API_URL=http://localhost:1234/v1/chat/completions
 ```
 
 **ネットワーク設定の注意点:**
 `backend`サービスは`docker-compose.yml`で`network_mode: "host"`を使用しています。これにより、`backend`コンテナはホストマシンのネットワーク名前空間を共有し、ホストの`localhost`経由でLMStudioなどのホストサービスに直接アクセスできます。この設定のため、`backend`サービスには`ports`マッピングは不要です。
+
+**開発時のホットリロード:**
+`docker-compose.yml`では、`frontend`および`backend`ディレクトリがコンテナ内にマウントされています。これにより、ローカルでコードを修正すると、自動的にコンテナ内のアプリケーションに反映（ホットリロード）され、開発効率が向上します。
 
 **ファイル権限の設定:**
 バックエンドが画像を保存する`/images`ディレクトリは、ホストマシンの`./images`ディレクトリにマウントされます。コンテナ内のアプリケーションユーザーがこのディレクトリに書き込めるよう、ホストマシン上で適切な権限を設定する必要があります。例えば、コンテナ内の`appuser`のUIDが`100`の場合、以下のコマンドで権限を付与できます。

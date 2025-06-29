@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import os
 import uuid
@@ -144,6 +144,16 @@ def oracle():
     finally:
         if temp_uploaded_image_path and os.path.exists(temp_uploaded_image_path):
             os.remove(temp_uploaded_image_path)
+
+@app.route('/api/image/<image_uuid>', methods=['GET'])
+def get_image(image_uuid):
+    # Find the image file with any extension
+    image_files = [f for f in os.listdir(IMAGE_DIR) if f.startswith(image_uuid)]
+    if not image_files:
+        return jsonify({"error": "Image not found"}), 404
+    
+    # Return the first found image
+    return send_from_directory(IMAGE_DIR, image_files[0])
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
